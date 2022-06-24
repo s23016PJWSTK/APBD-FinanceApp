@@ -1,0 +1,75 @@
+﻿@page "/register"
+@inject HttpClient Http
+@inject NavigationManager nav
+
+@layout EmptyLayout
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<section class="vh-100 gradient-custom">
+    <div class="mask d-flex align-items-center h-100 gradient-custom-3">
+    <div class="container h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+            <div class="card bg-dark text-white" style="border-radius: 15px;">
+            <div class="card-body p-5">
+                <h2 class="text-uppercase text-center mb-5">Create an account</h2>
+                <h2 class="text-uppercase text-center mb-3 fs-4">@message</h2>
+				<EditForm Model="reg" OnValidSubmit="OnValid">
+					<DataAnnotationsValidator />
+					<ValidationSummary />
+					
+					<div class="form-outline mb-4">
+						<input type="email" id="form3Example3cg" class="form-control form-control-lg" @bind-value="reg.email"/>
+						<label class="form-label" for="form3Example3cg">Your Email</label>
+					</div>
+
+					<div class="form-outline mb-4">
+						<input type="password" id="form3Example4cg" class="form-control form-control-lg" @bind-value="reg.password"/>
+						<label class="form-label" for="form3Example4cg">Password</label>
+					</div>
+
+					<div class="form-outline mb-4">
+						<input type="password" id="form3Example4cdg" class="form-control form-control-lg" @bind-value="reg.confirmpwd"/>
+						<label class="form-label" for="form3Example4cdg">Repeat your password</label>
+					</div>
+
+					<div class="d-flex justify-content-center">
+						<button class="btn btn-outline-light btn-lg px-5" type="submit">Register</button>
+					</div>
+
+					<p class="text-center text-muted mt-5 mb-0">@encourage<a href="/login" class="text-white-50 fw-bold ">@login</a></p>
+				</EditForm>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+@code {
+	RegModel reg = new RegModel();
+	string message = string.Empty , login = "Login here", encourage = "Have already an account? ";
+	bool isDisabled = false;
+
+	private async Task OnValid()
+	{
+		isDisabled = true;
+		using (var msg = await Http.PostAsJsonAsync<RegModel>("/api/auth/register", reg, System.Threading.CancellationToken.None))
+		{
+			if (msg.IsSuccessStatusCode)
+			{
+				LoginResult result = await msg.Content.ReadFromJsonAsync<LoginResult>();
+				message = result.message;
+				if (result.success)
+				{
+					login = "Click here to LOGIN.";
+					encourage = "";
+				}
+				else
+					isDisabled = false;
+			}
+		}
+	}
+}
