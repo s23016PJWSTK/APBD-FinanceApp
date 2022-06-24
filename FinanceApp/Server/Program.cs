@@ -1,6 +1,9 @@
 using FinanceApp.Server;
+using FinanceApp.Server.Models;
+using FinanceApp.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -9,7 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddTransient<IUserDatabase, UserDatabase>();
+builder.Services.AddDbContext<CredentialsDbContext>(opt => {
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("default"));
+});
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddAuthentication(option => {
 
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

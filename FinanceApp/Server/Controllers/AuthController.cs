@@ -1,4 +1,6 @@
-﻿using FinanceApp.Shared;
+﻿using FinanceApp.Server.Models;
+using FinanceApp.Server.Services;
+using FinanceApp.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,12 +12,12 @@ namespace FinanceApp.Server.Controllers
 	public class AuthController : ControllerBase
 	{
 		private readonly IConfiguration _configuration;
-		private IUserDatabase userdb { get; }
+		private readonly IAuthService _service;
 
-		public AuthController(IConfiguration configuration, IUserDatabase userdb)
+		public AuthController(IConfiguration configuration, IAuthService service)
         {
             _configuration = configuration;
-			this.userdb = userdb;
+			_service = service;
 		}
 
         private string CreateJWT(User user)
@@ -41,9 +43,12 @@ namespace FinanceApp.Server.Controllers
 		{
 			if (reg.password != reg.confirmpwd)
 				return new LoginResult { message = "Password and confirm password do not match.", success = false };
-			User newuser = await userdb.AddUser(reg.email, reg.password);
+			User newuser = await _service.AddUser(reg.email, reg.password);
 			if (newuser != null)
+			{
+				await _service.SaveChangesToCredDb();
 				return new LoginResult { message = "Registration successful.", jwtBearer = CreateJWT(newuser), email = reg.email, success = true };
+			}
 			return new LoginResult { message = "User already exists.", success = false };
 		}
 
@@ -51,7 +56,7 @@ namespace FinanceApp.Server.Controllers
 		[Route("api/auth/login")]
 		public async Task<LoginResult> Post([FromBody] LoginModel log)
 		{
-			User user = await userdb.AuthenticateUser(log.email, log.password);
+			User user = await _service.AuthenticateUser(log.email, log.password);
 			if (user != null)
 				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(user), email = log.email, success = true };
 			return new LoginResult { message = "User/password not found.", success = false };
