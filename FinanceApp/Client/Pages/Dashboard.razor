@@ -1,0 +1,142 @@
+﻿@page "/dashboard"
+@inject NavigationManager nav
+
+<section class="vh-100 gradient-custom">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+            <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                <div class="card-body p-5 text-center">
+              
+                <SfAutoComplete TValue="string" TItem="Ticketer" Placeholder="Select a company" DataSource="@Ticketers" ShowPopupButton="true" style=".e-ddl-icon::before {
+                        content: '\e724';
+                        font-family: 'e-icons';
+                        font-size: 16px;
+                        opacity: 0.4;}">
+                    <AutoCompleteTemplates TItem="Ticketer">
+                        <NoRecordsTemplate>
+                            <span class='norecord'> NO COMPANY FOUND</span>
+                        </NoRecordsTemplate>
+                        <ItemTemplate>
+                            <span>
+                                <span class='code'>@(context.Symbol)</span>
+                                <span class='name' style="left: 30%; position: absolute">@(context.Name)</span>
+                            </span>
+                        </ItemTemplate>
+                    </AutoCompleteTemplates>
+                    <AutoCompleteEvents TItem="Ticketer" TValue="string" OnValueSelect="@PickedHandler"></AutoCompleteEvents>
+                    <AutoCompleteFieldSettings Value="Symbol"></AutoCompleteFieldSettings>
+                </SfAutoComplete>
+
+                <div>
+                    <p class="text-center text-muted mt-5 mb-0">Don't have an account? <a  href="/register" class="text-white-50 fw-bold ">Sign Up</a></p>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@code {
+    List<Ticketer> Ticketers = new List<Ticketer>
+    {
+        new Ticketer
+        {
+            Symbol = "LUMN",
+            Name = "Lumen Technologies, Inc.",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3Lmx1bWVuLmNvbQ/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "WMB",
+            Name = "Williams Companies Inc.",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LndpbGxpYW1zLmNvbQ/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "SUZ",
+            Name = "Suzano S.A. American Depositary Shares",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LnN1emFuby5jb20uYnI/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "INTU",
+            Name =  "Intuit Inc",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LmludHVpdC5jb20/images/2022-01-10_logo.svg",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "TGNA",
+            Name = "TEGNA Inc.",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LnRlZ25hLmNvbQ/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "TMST",
+            Name =  "TIMKENSTEEL CORPORATION",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LnRpbWtlbnN0ZWVsLmNvbQ/images/2022-01-10_icon.jpeg",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "TSLA",
+            Name = "Tesla, Inc. Common Stock",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LnRlc2xhLmNvbQ/images/2022-01-10_logo.svg",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "TGA",
+            Name =  "Transglobe Energy Corp",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LnRyYW5zLWdsb2JlLmNvbQ/images/2022-01-10_logo.svg",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "MOGO",
+            Name = "Mogo Inc. Common Shares",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3Lm1vZ28uY2E/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+        new Ticketer
+        {
+            Symbol = "ESGRO",
+            Name = "Enstar Group Limited Depository",
+            Logo =  "https://api.polygon.io/v1/reference/company-branding/d3d3LmVuc3Rhcmdyb3VwLmNvbQ/images/2022-01-10_logo.png",
+            Sector = "stocks",
+            Country = "US",
+            CEO = "tmp"
+        },
+    };
+       
+
+    private void PickedHandler(SelectEventArgs<Ticketer> args)
+    {
+        nav.NavigateTo("/tiketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key);
+    }
+}

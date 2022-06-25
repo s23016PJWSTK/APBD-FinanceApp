@@ -1,0 +1,45 @@
+﻿@page "/ticketers/{Code:int}"
+@inject HttpClient Http
+@inject NavigationManager nav
+
+
+@code {
+    [Parameter]
+    public int Code { get; set; }
+    protected override async void OnInitialized()
+    {
+        var stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == Code).FirstOrDefault().Value;
+        using (var res = await Http.GetAsync("https://api.polygon.io/v2/aggs/ticker/" + stringCode + "/range/1/day/2020-06-01/2020-06-17?apiKey=lR82_LuddiKlh3IA19BcpvRpj8mb4jAD"))
+        {
+            if (res.IsSuccessStatusCode)
+            {
+                var json = await res.Content.ReadFromJsonAsync <GetFromPolygonIO>();
+                nav.NavigateTo("/" + json.Code);
+                //LoginResult result = await msg.Content.ReadFromJsonAsync<LoginResult>();
+				
+				//if (result.success) {
+					//await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.email};{result.jwtBearer}").ConfigureAwait(false);
+					
+				//}
+			}
+		}
+        
+        /*var json = System.IO.File.ReadAllText(@"d:\test.json");
+
+        var objects = JArray.Parse(json); // parse as array  
+        foreach(JObject root in objects)
+        {
+            foreach(KeyValuePair<String, JToken> app in root)
+            {
+                var appName = app.Key;
+                var description = (String)app.Value["Description"];
+                var value = (String)app.Value["Value"];
+
+                Console.WriteLine(appName);
+                Console.WriteLine(description);
+                Console.WriteLine(value);
+                Console.WriteLine("\n");
+            }
+        }*/
+    }
+}
