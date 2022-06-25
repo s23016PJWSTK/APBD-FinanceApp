@@ -71,7 +71,7 @@ else
 			var requestMsg = new HttpRequestMessage(HttpMethod.Get, $"/api/weatherforecast/{DateTime.Now.ToString("yyyy-MM-dd")}");
 			requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
 			var response = await Http.SendAsync(requestMsg);
-			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized) // NOTE: THEN TOKEN HAS EXPIRED
+			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;

@@ -1,18 +1,17 @@
 ﻿@page "/dashboard"
+@inject HttpClient Http
 @inject NavigationManager nav
+@inject IJSRuntime js
 
-<section class="vh-100 gradient-custom">
+
+ <section class="vh-50 gradient-custom">
     <div class="container py-5 h-100">
-        <div class="row d-flex justify-content-center align-items-center h-100">
-            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="row d-flex justify-content-center align-items-center h-100" style="min-width: 70%">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5" style="min-width: 70%">
             <div class="card bg-dark text-white" style="border-radius: 1rem;">
                 <div class="card-body p-5 text-center">
-              
-                <SfAutoComplete TValue="string" TItem="Ticketer" Placeholder="Select a company" DataSource="@Ticketers" ShowPopupButton="true" style=".e-ddl-icon::before {
-                        content: '\e724';
-                        font-family: 'e-icons';
-                        font-size: 16px;
-                        opacity: 0.4;}">
+                <h2 class="fw-bold mb-5 text-uppercase">DashBoard</h2>
+                <SfAutoComplete TValue="string" TItem="Ticketer" Placeholder="Select a company" DataSource="@Ticketers" ShowPopupButton="true" style="background-color: #212529; color: white">
                     <AutoCompleteTemplates TItem="Ticketer">
                         <NoRecordsTemplate>
                             <span class='norecord'> NO COMPANY FOUND</span>
@@ -27,10 +26,6 @@
                     <AutoCompleteEvents TItem="Ticketer" TValue="string" OnValueSelect="@PickedHandler"></AutoCompleteEvents>
                     <AutoCompleteFieldSettings Value="Symbol"></AutoCompleteFieldSettings>
                 </SfAutoComplete>
-
-                <div>
-                    <p class="text-center text-muted mt-5 mb-0">Don't have an account? <a  href="/register" class="text-white-50 fw-bold ">Sign Up</a></p>
-                </div>
                 </div>
             </div>
             </div>
@@ -38,6 +33,18 @@
     </div>
 </section>
 
+
+
+<style>
+    .e-dropdownbase .e-list-item, .e-dropdownbase .e-list-item.e-item-focus {
+    background-color: #212529;
+    font-size: 27px;
+    color: white;
+    border-block: 5px;
+    border-style: solid;
+    border-block-color: #212529;
+}
+</style>
 
 @code {
     List<Ticketer> Ticketers = new List<Ticketer>
@@ -133,10 +140,9 @@
             CEO = "tmp"
         },
     };
-       
 
     private void PickedHandler(SelectEventArgs<Ticketer> args)
     {
-        nav.NavigateTo("/tiketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key);
+        nav.NavigateTo("/ticketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key);
     }
 }
