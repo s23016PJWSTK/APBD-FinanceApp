@@ -9,8 +9,11 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.6" PrivateAssets="all" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="20.1.0.61" />
     <PackageReference Include="Syncfusion.Blazor.Data" Version="20.1.0.61" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="20.1.0.61" />
+    <PackageReference Include="Syncfusion.Blazor.Layouts" Version="20.1.0.61" />
+    <PackageReference Include="Syncfusion.Blazor.StockChart" Version="20.1.0.61" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="20.1.0.61" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>

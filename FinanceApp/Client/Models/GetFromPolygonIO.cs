@@ -2,12 +2,13 @@
 {
     public class GetFromPolygonIO
     {
-        public string Code { get; set; }
-        public bool Adjusted { get; set; }
-        public int QueryCount { get; set; }
-        public string RequestId { get; set; }
-        public int ResultCount { get; set; }
-        public string Status { get; set; }
-        public List<TicketerData> TicketersData { get; set; }
+        public string ticker { get; set; }
+        public bool adjusted { get; set; }
+        public int queryCount { get; set; }
+        public string request_id { get; set; }
+        public int resultsCount { get; set; }
+        public int count { get; set; }
+        public string status { get; set; }
+        public List<TicketerDataFromJson> results { get; set; }
     }
 }

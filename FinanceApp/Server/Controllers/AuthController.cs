@@ -1,6 +1,7 @@
 ﻿using FinanceApp.Server.Models;
 using FinanceApp.Server.Services;
 using FinanceApp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -61,5 +62,12 @@ namespace FinanceApp.Server.Controllers
 				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(new Models.User("tmp@uwu")), email = log.email, success = true };
 			return new LoginResult { message = "User/password not found.", success = false };
 		}
+		[HttpPost]
+		[Route("api/auth/chceck")]
+        [Authorize]
+		public IActionResult ChceckAuthorized()
+        {
+			return Ok();
+        }
 	}
 }

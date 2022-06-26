@@ -3,27 +3,135 @@
 @inject NavigationManager nav
 @inject IJSRuntime js
 
+
 @if (string.IsNullOrEmpty(userdata))
 {
 	<p><a href="/login">LOGIN TO ACCESS THIS DATA</a></p>
 }
 else
 {
-	if (ticketerData == null)
+	if (getFromPolygonIO == null || Ticketers == null)
 	{
 		<p><em>Loading...</em></p>
 	}
 	else
 	{
-		<h2>WorkinProgress</h2>
+		<div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+		<SfDashboardLayout CellSpacing="@(new double[]{20 ,20 })" CellAspectRatio="2" Columns="6">
+			<DashboardLayoutPanels>
+				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false>
+					<ContentTemplate>
+						<div class="container h-10">
+							<div class="row d-flex justify-content-center align-items-center h-10" style="min-width: 70%">
+								<div class="card bg-dark p-5 text-white" style="border-radius: 1rem; border: none;">
+									<div class="card-body text-center">
+										
+									</div>
+								</div>
+							</div>
+						</div>
+					</ContentTemplate>
+				</DashboardLayoutPanel>
+				<DashboardLayoutPanel SizeX=4 SizeY="5" Col="1" AllowDragging=false>
+					<ContentTemplate>
+						<div class="container h-10">
+							<div  style="padding-top: 10px; padding-bottom:10px">
+								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login1</button>
+								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login2</button>
+								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login3</button>
+								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login4</button>
+							</div>
+							<div class="row d-flex justify-content-center align-items-center h-10" style="min-width: 70%">
+								<div class="card bg-dark text-white" style="border-radius: 1rem; border: none;">
+									<div class="card-body text-center">
+										<SfStockChart Title="@getFromPolygonIO.ticker">
+											<StockChartSeriesCollection>
+												<StockChartSeries DataSource="@TicketerDatas" Type="ChartSeriesType.HiloOpenClose" XName="Date" YName="Close" High="High" Low="Low" Open="Open" Close="Close" Volume="Volume"></StockChartSeries>
+											</StockChartSeriesCollection>
+										</SfStockChart>
+									</div>
+								</div>
+							</div>
+						</div>
+					</ContentTemplate>
+				</DashboardLayoutPanel>
+				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false>
+					<ContentTemplate><div>2</div></ContentTemplate>
+				</DashboardLayoutPanel>
+				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false Enabled=false>
+					<ContentTemplate>
+						<section class="vh-10 gradient-custom">
+							<div class="container h-10">
+								<div class="row d-flex justify-content-center align-items-center h-10" style="min-width: 70%">
+									<div class="col-12 col-md-8 col-lg-6 col-xl-5" style="min-width: 70%">
+									<div class="card bg-dark text-white" style="border-radius: 1rem; border: none;">
+										<div class="card-body p-5 text-center">
+										<h2 class="fw-bold mb-5 text-uppercase">DashBoard</h2>
+										<SfAutoComplete TValue="string" TItem="Ticketer" Placeholder="Select a company" DataSource="@Ticketers" ShowPopupButton="true" style="background-color: #212529; color: white">
+											<AutoCompleteTemplates TItem="Ticketer">
+												<NoRecordsTemplate>
+													<span class='norecord'> NO COMPANY FOUND</span>
+												</NoRecordsTemplate>
+												<ItemTemplate>
+													<span>
+														<span class='code'>@(context.Symbol)</span>
+														<span class='name' style="left: 30%; position: absolute">@(context.Name)</span>
+													</span>
+												</ItemTemplate>
+											</AutoCompleteTemplates>
+											<AutoCompleteEvents TItem="Ticketer" TValue="string" OnValueSelect="@PickedHandler"></AutoCompleteEvents>
+											<AutoCompleteFieldSettings Value="Symbol"></AutoCompleteFieldSettings>
+										</SfAutoComplete>
+										</div>
+									</div>
+									</div>
+								</div>
+							</div>
+						</section>
+					</ContentTemplate>
+				</DashboardLayoutPanel>
+			</DashboardLayoutPanels>
+		</SfDashboardLayout>
+		</div>
+		</div>
+
+		<style>
+			.e-panel-content {
+				text-align: center;
+				margin-top: 10px;
+			}
+			.e-dashboardlayout.e-control .e-panel .e-panel-container .e-panel-content {
+				background-color: #212529;
+				color: white;
+				opacity: 1;
+			}
+			.e-dashboardlayout.e-control .e-panel .e-panel-container .e-panel-header {
+				background-color: #212529;
+				color: white;
+				text-align: center;
+				opacity: 1;
+			}
+			.e-dashboardlayout.e-control .e-panel {
+				background: #212529;
+				box-shadow: 0 2px 4px rgba(0,0,0,.075);
+				box-sizing: border-box;
+				position: absolute;
+				opacity: 1;
+			}
+		</style>
 	}
 }
 
 @code {
 	[Parameter]
 	public int Code { get; set; }
-	private GetFromPolygonIO ticketerData { get; set; }
+	GetFromPolygonIO getFromPolygonIO { get; set; }
+	private List<TicketerData> TicketerDatas { get; set; }
+	private List<Ticketer> Ticketers { get; set; }
+	//private List<Article> Articles { get; set; }
 	string userdata;
+
 
 	private async Task<string> GetJWT()
 	{
@@ -36,26 +144,75 @@ else
 		}
 		return null;
 	}
+	protected override async Task OnParametersSetAsync()
+	{
+		try
+		{
+			await base.OnParametersSetAsync();
+			var stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == Code).FirstOrDefault().Value;
+			var requestMsgOne = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/" + stringCode);
+			var requestMsgTwo = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer");
+			requestMsgOne.Headers.Add("Authorization", "Bearer " + await GetJWT());
+			requestMsgTwo.Headers.Add("Authorization", "Bearer " + await GetJWT());
+
+			var responseOne = await Http.SendAsync(requestMsgOne);
+			var responseTwo = await Http.SendAsync(requestMsgTwo);
+			if (responseOne.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+				userdata = null;
+			}
+			else if (responseOne.StatusCode == System.Net.HttpStatusCode.NoContent)
+				getFromPolygonIO = null;
+			else if (responseOne.IsSuccessStatusCode)
+				getFromPolygonIO = await responseOne.Content.ReadFromJsonAsync<GetFromPolygonIO>();
+			TicketerDatas = getFromPolygonIO.results.Select(e => new TicketerData
+				{
+					Close = e.c,
+					High = e.h,
+					Low = e.l,
+					Open = e.o,
+					Date = DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime,
+					Volume = e.v,
+				}).ToList();
+
+			if (responseTwo.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+				userdata = null;
+			}
+			else if (responseTwo.StatusCode == System.Net.HttpStatusCode.NoContent)
+				Ticketers = null;
+			else if (responseTwo.IsSuccessStatusCode)
+				Ticketers = await responseTwo.Content.ReadFromJsonAsync<List<Ticketer>>();
+		}
+		catch (Exception ex){}
+	}
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
 		try
 		{
-			var stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == Code).FirstOrDefault().Value;
-			var requestMsg = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/" + stringCode);
-			requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
-			var response = await Http.SendAsync(requestMsg);
+			var request = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer");
+			request.Headers.Add("Authorization", "Bearer " + await GetJWT());
+			var response = await Http.SendAsync(request);
 			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
-			else if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
-				ticketerData = null;
-			else if (response.IsSuccessStatusCode)
-				ticketerData = await response.Content.ReadFromJsonAsync<GetFromPolygonIO>();
 		}
 		catch (Exception ex){}
 	}
+
+	private void PickedHandler(SelectEventArgs<Ticketer> args)
+    {
+        nav.NavigateTo("/ticketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key);
+    }
+	//@foreach (var item in Articles)
+	//{
+	//	<p>@item.name</p><br />
+	//	<p>@item.title</p><p>@item.published_utc</p>
+	//}
 }

@@ -24,13 +24,15 @@ namespace FinanceApp.Server.Controllers
         public async Task<IActionResult> getTicketerData(string code)
         {
             var Http = new HttpClient();
-            //var stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == code).FirstOrDefault().Value;
-            using (var res = await Http.GetAsync("https://api.polygon.io/v2/aggs/ticker/" + code + "/range/1/day/" + DateTime.UtcNow.AddMonths(-3).AddDays(-2).ToString("yyyy-MM-dd") + "/" + DateTime.UtcNow.ToString("yyyy-MM-dd") + "?apiKey=lR82_LuddiKlh3IA19BcpvRpj8mb4jAD"))
+            var uri = "https://api.polygon.io/v2/aggs/ticker/" + code + "/range/1/day/" + DateTime.UtcNow.AddDays(-2).AddMonths(-3).ToString("yyyy-MM-dd") + "/" + DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var request = new HttpRequestMessage(HttpMethod.Get, uri);
+            request.Headers.Add("Authorization", "Bearer " + "lR82_LuddiKlh3IA19BcpvRpj8mb4jAD");
+            var res = await Http.SendAsync(request);
+            if (res.IsSuccessStatusCode)
             {
-                if (res.IsSuccessStatusCode)
-                {
-                    return Ok(await res.Content.ReadFromJsonAsync<GetFromPolygonIO>());
-                }
+                var result = await res.Content.ReadFromJsonAsync<GetFromPolygonIO>();
+                Console.WriteLine(result.count);
+                return Ok(result);
             }
             return NoContent();
         }
