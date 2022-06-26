@@ -6,9 +6,9 @@ namespace FinanceApp.Server.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly CredentialsDbContext _context;
+        private readonly FinanceDbContext _context;
 
-        public AuthService(CredentialsDbContext context)
+        public AuthService(FinanceDbContext context)
         {
             _context = context;
         }
@@ -18,9 +18,9 @@ namespace FinanceApp.Server.Services
             var hash = hasher.HashPassword(email, password);
             return hash;
         }
-        private IQueryable<UserCredentials> GetUserCredentials(string email)
+        private IQueryable<UserToDb> GetUserCredentials(string email)
         {
-            return _context.UsersCredentials.Where(e => e.Email == email);
+            return _context.Users.Where(e => e.Email == email);
         }
         public async Task<User> AddUser(string email, string password)
         {
@@ -30,7 +30,7 @@ namespace FinanceApp.Server.Services
                     return null;
                 if ((await GetUserCredentials(email).FirstOrDefaultAsync()) != null)
                     return null;
-                await _context.AddAsync(new UserCredentials
+                await _context.AddAsync(new UserToDb
                 {
                     Email = email,
                     Password = CreateHash(email, password)

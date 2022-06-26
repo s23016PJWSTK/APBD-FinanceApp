@@ -18,4 +18,3 @@ GO
 
 EXEC sp_MSforeachtable 'DROP TABLE ?'
 GO
-select * from UsersCredentials

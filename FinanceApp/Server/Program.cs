@@ -12,10 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddDbContext<CredentialsDbContext>(opt => {
+builder.Services.AddDbContext<FinanceDbContext>(opt => {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("default"));
 });
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITicketerService, TicketerService>();
 builder.Services.AddAuthentication(option => {
 
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

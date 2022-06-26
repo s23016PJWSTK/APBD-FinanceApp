@@ -22,7 +22,7 @@ else
 @code {
 	[Parameter]
 	public int Code { get; set; }
-	private TicketerData ticketerData { get; set; }
+	private GetFromPolygonIO ticketerData { get; set; }
 	string userdata;
 
 	private async Task<string> GetJWT()
@@ -53,8 +53,8 @@ else
 			}
 			else if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
 				ticketerData = null;
-			//else if (response.IsSuccessStatusCode)
-			//ticketerData = await response.Content.ReadFromJsonAsync<TicketerData>();
+			else if (response.IsSuccessStatusCode)
+				ticketerData = await response.Content.ReadFromJsonAsync<GetFromPolygonIO>();
 		}
 		catch (Exception ex){}
 	}

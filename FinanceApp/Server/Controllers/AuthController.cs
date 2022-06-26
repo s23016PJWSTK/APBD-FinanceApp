@@ -58,7 +58,7 @@ namespace FinanceApp.Server.Controllers
 		{
 			User user = await _service.AuthenticateUser(log.email, log.password);
 			if (user != null)
-				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(user), email = log.email, success = true };
+				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(new Models.User("tmp@uwu")), email = log.email, success = true };
 			return new LoginResult { message = "User/password not found.", success = false };
 		}
 	}
