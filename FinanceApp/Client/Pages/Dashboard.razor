@@ -81,6 +81,23 @@ else
 		await base.OnInitializedAsync();
 		try
 		{
+			var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/chceck");
+			request.Headers.Add("Authorization", "Bearer " + await GetJWT());
+			var response = await Http.SendAsync(request);
+			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+				userdata = null;
+			}
+		}
+		catch (Exception ex){}
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await base.OnParametersSetAsync();
+		try
+		{
 			var requestMsg = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer");
 			requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
 			var response = await Http.SendAsync(requestMsg);

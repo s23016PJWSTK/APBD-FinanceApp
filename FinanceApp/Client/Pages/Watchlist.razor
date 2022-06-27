@@ -1,0 +1,150 @@
+﻿@page "/watchlist"
+@inject IJSRuntime js
+@inject HttpClient Http
+@inject NavigationManager nav
+
+@if (string.IsNullOrEmpty(userdata))
+{
+	<p><a href="/login">LOGIN TO ACCESS THIS DATA</a></p>
+}
+else
+{
+	if (Ticketers == null)
+	{
+		<p><em>Loading...</em></p>
+	}
+	else
+    {
+        <h1 style="color: white;">Watchlist</h1>
+        <br><br>
+        <table>
+            <thead>
+                <tr>
+                    <th @onclick="@(() => Sort("Logo"))" style="width: 120px;">Logo</th>
+                    <th @onclick="@(() => Sort("Symbol"))">Symbol</th>
+                    <th @onclick="@(() => Sort("Name"))">Name</th>
+                    <th @onclick="@(() => Sort("Sector"))">Sector</th>
+                    <th @onclick="@(() => Sort("Country"))">Country</th>
+                    <th @onclick="@(() => Sort("CEO"))">CEO</th>
+                    <th style="border: 0px solid black; background-color:transparent;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ticketer in Ticketers)
+                {
+                    <tr>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))" style="width: 120px;"><img src="@ticketer.Logo" alt="@(ticketer.Symbol) Logo"></td>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))">@ticketer.Symbol</td>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))">@ticketer.Name</td>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))">@ticketer.Sector</td>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))">@ticketer.Country</td>
+                        <td @onclick="(() => ShowDetails(ticketer.Symbol))">@ticketer.CEO</td>
+                        <td style="border: 0px solid black; text-align: left; padding-left: 20px; background-color:transparent;">
+                            <button type="button" class="btn btn-danger btn-circle btn-sm" style="margin-bottom: 11px;" @onclick=@(() => DeleteStudent(ticketer.Symbol))>Delete</button>
+                            <!--<button @onclick="(() => DeleteStudent(ticketer.Symbol))"><span class="oi oi-trash"></span></button>-->
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private string userdata { get; set; }
+    public List<Ticketer> Ticketers { get; set; }
+    public KeyValuePair<string, bool> ColumnSort {get; set;} = new KeyValuePair<string, bool>("", false);
+
+    private async Task<string> GetJWT()
+    {
+        userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+        if (!string.IsNullOrWhiteSpace(userdata))
+        {
+            var dataArray = userdata.Split(';', 2);
+            if (dataArray.Length == 2)
+                return dataArray[1];
+        }
+        return null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/chceck");
+            request.Headers.Add("Authorization", "Bearer " + await GetJWT());
+            var response = await Http.SendAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+                userdata = null;
+            }
+        }
+        catch (Exception ex){}
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        try
+        {
+            var requestMsg = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0]);
+            requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
+            var response = await Http.SendAsync(requestMsg);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+                userdata = null;
+            }
+            else if (response.IsSuccessStatusCode)
+                Ticketers = await response.Content.ReadFromJsonAsync<List<Ticketer>>();
+        }
+        catch (Exception ex){}
+    }
+
+    private void Sort(string columnName){
+        if(ColumnSort.Key != columnName){
+            ColumnSort = new KeyValuePair<string, bool>(columnName, false); 
+        } else {
+            ColumnSort = new KeyValuePair<string, bool>(columnName, !ColumnSort.Value); 
+        }
+
+        if(ColumnSort.Value)
+            SortAsc(columnName);
+        else
+            SortDesc(columnName);
+    }
+    private void SortAsc(string columnName){
+        Ticketers = Ticketers.OrderByDescending(e => e.GetType().GetProperty(columnName).GetValue(e, null)).ToList();
+    }
+
+    private void SortDesc(string columnName){
+        Ticketers = Ticketers.OrderBy(e => e.GetType().GetProperty(columnName).GetValue(e, null)).ToList();
+    }
+
+    private async Task DeleteStudent(string Symbol){
+        var result = await js.InvokeAsync<bool>("confirm", "Are you sure?");
+        int code = GoAroundSendingStringCode.List.Where(e => e.Value == Symbol).FirstOrDefault().Key;
+        
+        if(result){
+            var requestMsg = new HttpRequestMessage(HttpMethod.Delete, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0] + "/" + code);
+            requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
+            var response = await Http.SendAsync(requestMsg);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+                userdata = null;
+            }
+            else if (response.IsSuccessStatusCode)
+            {
+                Ticketers.Remove(Ticketers.FirstOrDefault(e => e.Symbol == Symbol));
+            }
+        }
+    }
+
+    private void ShowDetails(string Symbol){
+        int code = GoAroundSendingStringCode.List.Where(e => e.Value == Symbol).FirstOrDefault().Key;
+        nav.NavigateTo("/ticketers/" + code);
+    }
+}

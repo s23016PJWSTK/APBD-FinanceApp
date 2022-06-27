@@ -10,7 +10,7 @@
 }
 else
 {
-	if (getFromPolygonIO == null || Ticketers == null)
+	if (TicketerDatas == null || Ticketers == null || Articles == null)
 	{
 		<p><em>Loading...</em></p>
 	}
@@ -20,16 +20,16 @@ else
         <div class="row d-flex justify-content-center align-items-center h-100">
 		<SfDashboardLayout CellSpacing="@(new double[]{20 ,20 })" CellAspectRatio="2" Columns="6">
 			<DashboardLayoutPanels>
-				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false>
+				<DashboardLayoutPanel SizeX=4 SizeY=7 Col="1" AllowDragging=false>
 					<ContentTemplate>
 						<div class="container h-10">
-							<div class="row d-flex justify-content-center align-items-center h-10" style="min-width: 70%">
-								<div class="card bg-dark p-5 text-white" style="border-radius: 1rem; border: none;">
-									<div class="card-body text-center">
-										
-									</div>
-								</div>
-							</div>
+							<div class="card bg-dark p-5 text-white" style="border-radius: 1rem; border: none;">	
+								@foreach (var item in Articles)
+								{	
+									<h3 style="text-align: left"><a href="@item.article_url">@item.publisher.name</a></h3><br />
+									<p style="text-align: left; font-size: 14px">@item.title</p> <p style="text-align: right">@item.published_utc</p>								
+								}
+							</div>	
 						</div>
 					</ContentTemplate>
 				</DashboardLayoutPanel>
@@ -37,15 +37,15 @@ else
 					<ContentTemplate>
 						<div class="container h-10">
 							<div  style="padding-top: 10px; padding-bottom:10px">
-								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login1</button>
+								<!---<button class="btn btn-outline-light btn-sm px-5" type="submit">Login1</button>
 								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login2</button>
 								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login3</button>
-								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login4</button>
+								<button class="btn btn-outline-light btn-sm px-5" type="submit">Login4</button>-->
 							</div>
 							<div class="row d-flex justify-content-center align-items-center h-10" style="min-width: 70%">
 								<div class="card bg-dark text-white" style="border-radius: 1rem; border: none;">
 									<div class="card-body text-center">
-										<SfStockChart Title="@getFromPolygonIO.ticker">
+										<SfStockChart Title="@stringCode">
 											<StockChartSeriesCollection>
 												<StockChartSeries DataSource="@TicketerDatas" Type="ChartSeriesType.HiloOpenClose" XName="Date" YName="Close" High="High" Low="Low" Open="Open" Close="Close" Volume="Volume"></StockChartSeries>
 											</StockChartSeriesCollection>
@@ -57,7 +57,23 @@ else
 					</ContentTemplate>
 				</DashboardLayoutPanel>
 				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false>
-					<ContentTemplate><div>2</div></ContentTemplate>
+					<ContentTemplate>
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<img src="@Ticketer.Logo" alt="@(Ticketer.Symbol) Logo">
+							<h1 style="margin-bottom: 0; margin-right: 23%;"> @Ticketer.Name (@Ticketer.Symbol)</h1> <br>
+						</div>
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<table style="text-align: left; margin-left: 25%;">
+							<tr>
+								<td style="padding-right: 20px"><p style="font-size: 1rem;">Country: @Ticketer.Country</p></td>
+								<td style="padding-right: 20px"><p style="font-size: 1rem;">Industry: @Ticketer.Sector</p></td>
+								<td style="padding-right: 30px"><p style="font-size: 1rem;">CEO: @Ticketer.CEO</p></td>
+								<td style="padding-right: 20px;"><button type="button" class="btn btn-light btn-circle btn-sm" style="margin-bottom: 11px;" @onclick=@(AddToWatchList)>Add to Watchlist</button></td>
+							</tr>
+						</table>
+						</div>
+						
+					</ContentTemplate>
 				</DashboardLayoutPanel>
 				<DashboardLayoutPanel SizeX=4 SizeY=2 Col="1" AllowDragging=false Enabled=false>
 					<ContentTemplate>
@@ -126,10 +142,11 @@ else
 @code {
 	[Parameter]
 	public int Code { get; set; }
-	GetFromPolygonIO getFromPolygonIO { get; set; }
+	string stringCode { get; set; }
 	private List<TicketerData> TicketerDatas { get; set; }
 	private List<Ticketer> Ticketers { get; set; }
-	//private List<Article> Articles { get; set; }
+	private Ticketer Ticketer { get; set; }
+	private List<Article> Articles { get; set; }
 	string userdata;
 
 
@@ -149,12 +166,16 @@ else
 		try
 		{
 			await base.OnParametersSetAsync();
-			var stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == Code).FirstOrDefault().Value;
+			stringCode = GoAroundSendingStringCode.List.Where(e => e.Key == Code).FirstOrDefault().Value;
+
 			var requestMsgOne = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/" + stringCode);
 			var requestMsgTwo = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer");
+			var requestMsgThree = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/news/" + stringCode);
 			requestMsgOne.Headers.Add("Authorization", "Bearer " + await GetJWT());
 			requestMsgTwo.Headers.Add("Authorization", "Bearer " + await GetJWT());
+			requestMsgThree.Headers.Add("Authorization", "Bearer " + await GetJWT());
 
+			var responseThree = await Http.SendAsync(requestMsgThree);
 			var responseOne = await Http.SendAsync(requestMsgOne);
 			var responseTwo = await Http.SendAsync(requestMsgTwo);
 			if (responseOne.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -162,11 +183,9 @@ else
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
-			else if (responseOne.StatusCode == System.Net.HttpStatusCode.NoContent)
-				getFromPolygonIO = null;
-			else if (responseOne.IsSuccessStatusCode)
-				getFromPolygonIO = await responseOne.Content.ReadFromJsonAsync<GetFromPolygonIO>();
-			TicketerDatas = getFromPolygonIO.results.Select(e => new TicketerData
+			else if (responseOne.IsSuccessStatusCode){
+				TicketerDatas = (await responseOne.Content.ReadFromJsonAsync<GetFromPolygonIO>())
+				.results.Select(e => new TicketerData
 				{
 					Close = e.c,
 					High = e.h,
@@ -175,6 +194,7 @@ else
 					Date = DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime,
 					Volume = e.v,
 				}).ToList();
+			}
 
 			if (responseTwo.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
@@ -185,6 +205,23 @@ else
 				Ticketers = null;
 			else if (responseTwo.IsSuccessStatusCode)
 				Ticketers = await responseTwo.Content.ReadFromJsonAsync<List<Ticketer>>();
+
+			if (responseThree.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+				userdata = null;
+			}
+			else if (responseThree.IsSuccessStatusCode){
+				Articles = (await responseThree.Content.ReadFromJsonAsync<GetFromPolygonIONews>())
+				.results.Select(e => new Article
+				{
+					publisher = e.publisher,
+					article_url = e.article_url,
+					title = e.title,
+					published_utc = e.published_utc
+				}).ToList();
+			}
+			Ticketer = Ticketers.Where(e => e.Symbol == stringCode).FirstOrDefault();
 		}
 		catch (Exception ex){}
 	}
@@ -194,7 +231,7 @@ else
 		await base.OnInitializedAsync();
 		try
 		{
-			var request = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer");
+			var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/chceck");
 			request.Headers.Add("Authorization", "Bearer " + await GetJWT());
 			var response = await Http.SendAsync(request);
 			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -207,12 +244,31 @@ else
 	}
 
 	private void PickedHandler(SelectEventArgs<Ticketer> args)
-    {
-        nav.NavigateTo("/ticketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key);
-    }
-	//@foreach (var item in Articles)
-	//{
-	//	<p>@item.name</p><br />
-	//	<p>@item.title</p><p>@item.published_utc</p>
-	//}
+	{
+		nav.NavigateTo("/ticketers/" + GoAroundSendingStringCode.List.Where(e => e.Value == args.ItemData.Symbol).FirstOrDefault().Key, forceLoad: true);
+	}
+
+	private void GoToNewsPage(Article article)
+	{
+		nav.NavigateTo(article.article_url);
+	}
+
+	private async void AddToWatchList()
+	{
+		//perhaps block button if already in watch list
+		try
+		{
+			var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0] + "/" + Code);
+			requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
+			var response = await Http.SendAsync(requestMsg);
+			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+			{
+				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
+				userdata = null;
+			}
+			else if (response.IsSuccessStatusCode)
+				nav.NavigateTo("/watchlist");
+		}
+		catch (Exception ex){}
+	}
 }
