@@ -1,9 +1,36 @@
 ﻿@page "/"
+@inject IJSRuntime jsr
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Finance App</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+@if (string.IsNullOrEmpty(username))
+{
+	<div style="color: white">
+		<h1>Welcome!</h1>
+		<p>Welcome to your finance app. Please log in to procide.</p>
+	</div>
+} else
+{
+	<div style="color: white">
+		<h1>Welcome!</h1>
+		<p>Welcome back @username. Now you can procide freely to apps utility.</p>
+	</div>
+	
+}
 
-<SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+
+	string username = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+		var userdata = await jsr.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+		if (!string.IsNullOrWhiteSpace(userdata))
+		{
+			username = userdata.Split(';', 2)[0];
+		}
+	}
+}

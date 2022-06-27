@@ -30,14 +30,20 @@ namespace FinanceApp.Server.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Add("Authorization", "Bearer " + _configuration["KeyBase:PolygonIoApiKey"]);
             var res = await Http.SendAsync(request);
+            if (res.StatusCode == System.Net.HttpStatusCode.GatewayTimeout || res.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return StatusCode(203, _service.LoadTicketerNewsFromDb(code));
+            }
             if (res.IsSuccessStatusCode)
             {
-                return Ok(await res.Content.ReadFromJsonAsync<GetFromPolygonIONews>());
+                var result = await res.Content.ReadFromJsonAsync<GetFromPolygonIONews>();
+                SaveTicketerNewsToDbIfNeeded(result, code);
+                return Ok(result);
             }
             return NoContent();
         }
 
-		[HttpGet("{code}")]
+        [HttpGet("{code}")]
         [Authorize]
         public async Task<IActionResult> getTicketerData(string code)
         {
@@ -46,12 +52,19 @@ namespace FinanceApp.Server.Controllers
             var request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Add("Authorization", "Bearer " + _configuration["KeyBase:PolygonIoApiKey"]);
             var res = await Http.SendAsync(request);
+            if(res.StatusCode == System.Net.HttpStatusCode.GatewayTimeout || res.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return StatusCode(203, _service.LoadTicketerDataFromDb(code));
+            }
             if (res.IsSuccessStatusCode)
             {
-                return Ok(await res.Content.ReadFromJsonAsync<GetFromPolygonIO>());
+                var result = await res.Content.ReadFromJsonAsync<GetFromPolygonIO>();
+                SaveTicketerDataToDbIfNeeded(result);
+                return Ok(result);
             }
             return NoContent();
         }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> getTicketers()
@@ -95,7 +108,9 @@ namespace FinanceApp.Server.Controllers
                 await _service.SavaChangesToDb();
             }
             if((await _service.GetTicketer(TicketerId)) == null)
-                return BadRequest();
+                return BadRequest("There is no such Company in database");
+            if((await _service.GetWatchList_Ticketers(user).ToListAsync()).FirstOrDefault(e => e.TicketerId == TicketerId) != null)
+                return BadRequest("Already on watchlist");
             await _service.AddToWatchlist(user, TicketerId);
             await _service.SavaChangesToDb();
             return Ok();
@@ -113,6 +128,49 @@ namespace FinanceApp.Server.Controllers
             await _service.RemoveFromWatchList(user, TicketerId);
             await _service.SavaChangesToDb();
             return Ok();
+        }
+
+        private async void SaveTicketerNewsToDbIfNeeded(GetFromPolygonIONews result, string code)
+        {
+            var inDb = _service.LoadTicketerNewsFromDb(code);
+            if (inDb == null || inDb.Count == 0|| inDb.Max(e => e.published_utc) < result.results.Max(e => e.published_utc))
+            {
+                var toAdd = result
+                    .results.Select(e => new Models.ArticleToDb
+                    {
+                        TicketerId = GoAroundSendingStringCode.List.FirstOrDefault(e => e.Value == code).Key,
+                        name = e.publisher.name,
+                        title = e.title,
+                        article_url = e.article_url,
+                        published_utc = e.published_utc,
+                    }).ToList();
+                if (inDb == null || inDb.Count == 0)
+                    await _service.SaveTicketerNewsToDb(code, toAdd);
+                else
+                    await _service.SaveTicketerNewsToDb(code, toAdd.Where(e => e.published_utc > inDb.Max(e => e.published_utc)).ToList());
+            }
+        }
+
+        private async void SaveTicketerDataToDbIfNeeded(GetFromPolygonIO result)
+        {
+            var inDb = _service.LoadTicketerDataFromDb(result.ticker);
+            if (inDb == null || inDb.Count == 0 || inDb.Max(e => e.Date) < result.results.Max(e => DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime)) {
+                var toAdd = result
+                    .results.Select(e => new Models.TicketerDataToDb
+                    {
+                        TicketerId = GoAroundSendingStringCode.List.FirstOrDefault(e => e.Value == result.ticker).Key,
+                        Close = e.c,
+                        Highest = e.h,
+                        Lowest = e.l,
+                        Open = e.o,
+                        Date = DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime,
+                        Volume = e.v,
+                    }).ToList();
+                if (inDb == null || inDb.Count == 0)
+                    await _service.SaveTicketerDataToDb(result.ticker, toAdd);
+                else
+                    await _service.SaveTicketerDataToDb(result.ticker, toAdd.Where(e => e.Date > inDb.Max(e => e.Date)).ToList());
+            }
         }
     }
 }

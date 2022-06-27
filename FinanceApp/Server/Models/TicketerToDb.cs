@@ -11,5 +11,6 @@
         public string CEO { get; set; }
         public virtual List<TicketerDataToDb> TicketerDatas { get; set; }
         public virtual List<WatchList_Ticketer> WatchList_Ticketers { get; set; }
+        public virtual List<ArticleToDb> Articles { get; set; }
     }
 }

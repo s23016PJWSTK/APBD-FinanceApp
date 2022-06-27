@@ -14,6 +14,10 @@ else
 	{
 		<p><em>Loading...</em></p>
 	}
+	else if (TicketerDatas.Count == 0 || Ticketers.Count == 0)
+	{
+		<p><em>Could not load...</em></p>
+	}
 	else
 	{
 		<div class="container py-5 h-100">
@@ -178,48 +182,64 @@ else
 			var responseThree = await Http.SendAsync(requestMsgThree);
 			var responseOne = await Http.SendAsync(requestMsgOne);
 			var responseTwo = await Http.SendAsync(requestMsgTwo);
+
+			//Data for specified Ticketer
 			if (responseOne.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
-			else if (responseOne.IsSuccessStatusCode){
+			else if (responseOne.StatusCode == System.Net.HttpStatusCode.NoContent)
+				TicketerDatas = new List<TicketerData>();
+			else if (responseOne.StatusCode == System.Net.HttpStatusCode.NonAuthoritativeInformation)
+				TicketerDatas = (await responseOne.Content.ReadFromJsonAsync<List<TicketerData>>());
+			else if (responseOne.StatusCode == System.Net.HttpStatusCode.OK)
+			{
 				TicketerDatas = (await responseOne.Content.ReadFromJsonAsync<GetFromPolygonIO>())
 				.results.Select(e => new TicketerData
-				{
-					Close = e.c,
-					High = e.h,
-					Low = e.l,
-					Open = e.o,
-					Date = DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime,
-					Volume = e.v,
-				}).ToList();
+					{
+						Close = e.c,
+						High = e.h,
+						Low = e.l,
+						Open = e.o,
+						Date = DateTimeOffset.FromUnixTimeMilliseconds(e.t).DateTime,
+						Volume = e.v,
+					}).ToList();
 			}
 
+			//Ticketers for Dashboard
 			if (responseTwo.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
 			else if (responseTwo.StatusCode == System.Net.HttpStatusCode.NoContent)
-				Ticketers = null;
+				Ticketers = new List<Ticketer>();
 			else if (responseTwo.IsSuccessStatusCode)
 				Ticketers = await responseTwo.Content.ReadFromJsonAsync<List<Ticketer>>();
-
+			
+			//Articles
 			if (responseThree.StatusCode == System.Net.HttpStatusCode.Unauthorized)
 			{
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
-			else if (responseThree.IsSuccessStatusCode){
+			else if (responseThree.StatusCode == System.Net.HttpStatusCode.NoContent)
+			{
+				Articles = new List<Article>();
+			}
+			else if (responseThree.StatusCode == System.Net.HttpStatusCode.NonAuthoritativeInformation)
+				Articles = (await responseThree.Content.ReadFromJsonAsync<List<Article>>());
+			else if (responseThree.StatusCode == System.Net.HttpStatusCode.OK)
+			{
 				Articles = (await responseThree.Content.ReadFromJsonAsync<GetFromPolygonIONews>())
 				.results.Select(e => new Article
-				{
-					publisher = e.publisher,
-					article_url = e.article_url,
-					title = e.title,
-					published_utc = e.published_utc
-				}).ToList();
+					{
+						publisher = e.publisher,
+						article_url = e.article_url,
+						title = e.title,
+						published_utc = e.published_utc
+					}).ToList();
 			}
 			Ticketer = Ticketers.Where(e => e.Symbol == stringCode).FirstOrDefault();
 		}
@@ -266,6 +286,8 @@ else
 				await js.InvokeVoidAsync("localStorage.removeItem", "user").ConfigureAwait(false);
 				userdata = null;
 			}
+			else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+				await js.InvokeVoidAsync("alert", await response.Content.ReadAsStringAsync());
 			else if (response.IsSuccessStatusCode)
 				nav.NavigateTo("/watchlist");
 		}

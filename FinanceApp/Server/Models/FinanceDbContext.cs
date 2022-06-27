@@ -9,6 +9,7 @@ namespace FinanceApp.Server.Models
         public DbSet<WatchList_Ticketer> WatchList_Ticketers { get; set; }
         public DbSet<TicketerToDb> Ticketers { get; set; }
         public DbSet<TicketerDataToDb> TicketerDatas { get; set; }
+        public DbSet<ArticleToDb> Articles { get; set; }
         public FinanceDbContext(DbContextOptions options) : base(options)
         {
         }
@@ -66,100 +67,100 @@ namespace FinanceApp.Server.Models
                         TicketerId = 1,
                         Symbol = "LUMN",
                         Name = "Lumen Technologies, Inc.",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi1.wp.com%2Fwww.denverpost.com%2Fwp-content%2Fuploads%2F2020%2F09%2FLumen-Logo.png%3Ffit%3D620%252C9999px%26ssl%3D1&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://s24.q4cdn.com/287068338/files/design/lumen-logo-blue-black.png",
+                        Sector = "fiber infrastructure",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Jeffrey Storey"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 2,
                         Symbol = "WMB",
-                        Name = " Inc.",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Flogosandbrands.directory%2Fwp-content%2Fthemes%2Fdirectorypress%2Fthumbs%2FWilliams-Companies-logo.jpg&f=1&nofb=1",
-                        Sector = "stocks",
+                        Name = "Williams Companies Inc.",
+                        Logo = "https://g.foolcdn.com/art/companylogos/medium/WMB.png",
+                        Sector = "Utilities",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Alan S. Armstrong"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 3,
                         Symbol = "SUZ",
-                        Name = "Suzano S.A. American Depositary Shares",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Flogodownload.org%2Fwp-content%2Fuploads%2F2014%2F07%2Fsuzano-logo-1.png&f=1&nofb=1",
-                        Sector = "stocks",
+                        Name = "Suzano S.A.",
+                        Logo = "https://suzano-site.s3-sa-east-1.amazonaws.com/assets/img/logo-suzano-rodape.png",
+                        Sector = "bio-based materials",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Walter Schalka"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 4,
                         Symbol = "INTU",
                         Name = "Intuit Inc",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Feveripedia-storage.s3-accelerate.amazonaws.com%2FProfilePics%2F83065__29332.png&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Intuit_Logo.svg/1200px-Intuit_Logo.svg.png",
+                        Sector = "financial management",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Sasan K. Goodarzi"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 5,
                         Symbol = "TGNA",
                         Name = "TEGNA Inc.",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fmms.businesswire.com%2Fmedia%2F20150721005847%2Fen%2F474552%2F5%2FTEGNA_Logo.jpg&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://res.cloudinary.com/etoro/image/fetch/w_1.5/https://etoro-cdn.etorostatic.com/market-avatars/6873/150x150.png",
+                        Sector = "media provider",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Dave Lougee"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 6,
                         Symbol = "TMST",
                         Name = "TIMKENSTEEL CORPORATION",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fmma.prnewswire.com%2Fmedia%2F476403%2Fthe_timken_company_timkensteel_corporation_logo.jpg%3Fp%3Dpublish%26w%3D950&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://www.timkensteel.com/img/timkenSteelShare.jpg",
+                        Sector = "basic materials",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Michael Williams"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 7,
                         Symbol = "TSLA",
                         Name = "Tesla, Inc.",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.Uu1GrEpm9v2YGCNB0iRmkwHaHa%26pid%3DApi&f=1",
-                        Sector = "stocks",
+                        Logo = "https://upload.wikimedia.org/wikipedia/commons/e/e8/Tesla_logo.png",
+                        Sector = "Automotive, Energy Generation",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Elon Musk"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 8,
                         Symbol = "TGA",
                         Name = "Transglobe Energy Corp",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.cbj.ca%2Fwp-content%2Fuploads%2F2021%2F01%2Ftransglobe-energy-corporation-announces-its-2021-capital-budget.jpg&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://s24.q4cdn.com/107256193/files/design/transglobe-logo.svg",
+                        Sector = "oil exploration",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Randy Neely"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 9,
                         Symbol = "MOGO",
                         Name = "Mogo Inc.",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse3.mm.bing.net%2Fth%3Fid%3DOIP.wHxnsGXoVsXXmYLj_tAmSgHaHa%26pid%3DApi&f=1",
-                        Sector = "stocks",
+                        Logo = "https://static.seekingalpha.com/uploads/2020/1/13/22464021-15789554209817338.jpg",
+                        Sector = "information",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "David Feller"
                     },
                     new TicketerToDb
                     {
                         TicketerId = 10,
                         Symbol = "ESGRO",
                         Name = "Enstar Group",
-                        Logo = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.marketbeat.com%2Flogos%2Fenstar-group-ltd-logo.png&f=1&nofb=1",
-                        Sector = "stocks",
+                        Logo = "https://s3-symbol-logo.tradingview.com/enstar-group--600.png",
+                        Sector = "insurance",
                         Country = "US",
-                        CEO = "tmp"
+                        CEO = "Paul J. O'Shea"
                     }
                 );
             });
@@ -180,6 +181,20 @@ namespace FinanceApp.Server.Models
 
                 e.HasOne(e => e.Ticketer)
                 .WithMany(e => e.TicketerDatas)
+                .HasForeignKey(e => e.TicketerId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ArticleToDb>(e =>
+            {
+                e.ToTable("Article");
+                e.HasKey(e => new { e.TicketerId, e.published_utc });
+                e.Property(e => e.title).IsRequired();
+                e.Property(e => e.article_url).IsRequired();
+                e.Property(e => e.name).IsRequired();
+
+                e.HasOne(e => e.Ticketer)
+                .WithMany(e => e.Articles)
                 .HasForeignKey(e => e.TicketerId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
