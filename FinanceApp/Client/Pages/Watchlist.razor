@@ -56,16 +56,14 @@ else
     public KeyValuePair<string, bool> ColumnSort {get; set;} = new KeyValuePair<string, bool>("", false);
 
     private async Task<string> GetJWT()
-    {
-        userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
-        if (!string.IsNullOrWhiteSpace(userdata))
-        {
-            var dataArray = userdata.Split(';', 2);
-            if (dataArray.Length == 2)
-                return dataArray[1];
-        }
-        return null;
-    }
+	{
+		userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
+		if (!string.IsNullOrWhiteSpace(userdata))
+		{
+			return userdata;
+		}
+		return null;
+	}
 
     protected override async Task OnInitializedAsync()
     {
@@ -89,7 +87,7 @@ else
         await base.OnParametersSetAsync();
         try
         {
-            var requestMsg = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0]);
+            var requestMsg = new HttpRequestMessage(HttpMethod.Get, "/api/ticketer/watchlist");
             requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
             var response = await Http.SendAsync(requestMsg);
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -128,7 +126,8 @@ else
         int code = GoAroundSendingStringCode.List.Where(e => e.Value == Symbol).FirstOrDefault().Key;
         
         if(result){
-            var requestMsg = new HttpRequestMessage(HttpMethod.Delete, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0] + "/" + code);
+
+            var requestMsg = new HttpRequestMessage(HttpMethod.Delete, "/api/ticketer/watchlist/" + code);
             requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
             var response = await Http.SendAsync(requestMsg);
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)

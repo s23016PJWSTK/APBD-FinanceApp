@@ -1,7 +1,7 @@
 ﻿@inject IJSRuntime js
 
 <p>
-	@if (!string.IsNullOrEmpty(username))
+	@if (!string.IsNullOrEmpty(userdata))
 	{
 		<span style="color:white"><a href="/logout">(Logout)</a></span>
 	} 
@@ -9,15 +9,11 @@
 
 @code {
 
-	string username = string.Empty;
+	string userdata = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
 		var userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
-		if (!string.IsNullOrWhiteSpace(userdata))
-		{
-			username = userdata.Split(';', 2)[0];
-		}
 	}
 }

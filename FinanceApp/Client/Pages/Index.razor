@@ -1,10 +1,10 @@
 ﻿@page "/"
-@inject IJSRuntime jsr
+@inject IJSRuntime js
 
 <PageTitle>Finance App</PageTitle>
 
 
-@if (string.IsNullOrEmpty(username))
+@if (string.IsNullOrEmpty(userdata))
 {
 	<div style="color: white">
 		<h1>Welcome!</h1>
@@ -14,7 +14,7 @@
 {
 	<div style="color: white">
 		<h1>Welcome!</h1>
-		<p>Welcome back @username. Now you can procide freely to apps utility.</p>
+		<p>Welcome back. Now you can procide freely to apps utility.</p>
 	</div>
 	
 }
@@ -22,15 +22,11 @@
 
 @code {
 
-	string username = string.Empty;
+	string userdata = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
-		var userdata = await jsr.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
-		if (!string.IsNullOrWhiteSpace(userdata))
-		{
-			username = userdata.Split(';', 2)[0];
-		}
+		var userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
 	}
 }

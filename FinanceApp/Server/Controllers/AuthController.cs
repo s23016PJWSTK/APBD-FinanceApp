@@ -26,15 +26,15 @@ namespace FinanceApp.Server.Controllers
 			var secretkey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration["KeyBase:ServiceApiKey"])); // NOTE: SAME KEY AS USED IN Program.cs FILE
 			var credentials = new SigningCredentials(secretkey, SecurityAlgorithms.HmacSha256);
 
-			/*var claims = new[] // NOTE: could also use List<Claim> here
+			var claims = new[] // NOTE: could also use List<Claim> here
 			{
 				new Claim(ClaimTypes.Name, user.Email), // NOTE: this will be the "User.Identity.Name" value
 				new Claim(JwtRegisteredClaimNames.Sub, user.Email),
 				new Claim(JwtRegisteredClaimNames.Email, user.Email),
 				new Claim(JwtRegisteredClaimNames.Jti, user.Email) // NOTE: this could a unique ID assigned to the user by a database
-			};*/
+			};
 
-			var token = new JwtSecurityToken(issuer: "localhost:7104", audience: "localhost:7104", expires: DateTime.Now.AddMinutes(10), signingCredentials: credentials);
+			var token = new JwtSecurityToken(issuer: "localhost:7104", audience: "localhost:7104", claims: claims, expires: DateTime.Now.AddMinutes(10), signingCredentials: credentials);
 			return new JwtSecurityTokenHandler().WriteToken(token);
 		}
 
@@ -48,7 +48,7 @@ namespace FinanceApp.Server.Controllers
 			if (newuser != null)
 			{
 				await _service.SaveChangesToCredDb();
-				return new LoginResult { message = "Registration successful.", jwtBearer = CreateJWT(newuser), email = reg.email, success = true };
+				return new LoginResult { message = "Registration successful.", jwtBearer = CreateJWT(newuser), success = true };
 			}
 			return new LoginResult { message = "User already exists.", success = false };
 		}
@@ -59,9 +59,10 @@ namespace FinanceApp.Server.Controllers
 		{
 			User user = await _service.AuthenticateUser(log.email, log.password);
 			if (user != null)
-				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(new Models.User("tmp@uwu")), email = log.email, success = true };
+				return new LoginResult { message = "Login successful.", jwtBearer = CreateJWT(new User(log.email)), success = true };
 			return new LoginResult { message = "User/password not found.", success = false };
 		}
+
 		[HttpPost]
 		[Route("api/auth/chceck")]
         [Authorize]

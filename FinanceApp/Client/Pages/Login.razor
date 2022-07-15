@@ -56,7 +56,7 @@
 				message = result.message;
 				isDisabled = false;
 				if (result.success) {
-					await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.email};{result.jwtBearer}").ConfigureAwait(false);
+					await jsr.InvokeVoidAsync("localStorage.setItem", "user", $"{result.jwtBearer}").ConfigureAwait(false);
 					nav.NavigateTo("/");
 				}
 			}

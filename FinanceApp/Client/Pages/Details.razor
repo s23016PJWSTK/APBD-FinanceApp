@@ -139,6 +139,12 @@ else
 				position: absolute;
 				opacity: 1;
 			}
+			.e-dropdownbase .e-list-item, .e-dropdownbase .e-list-item.e-item-focus {
+				background-color: #212529;
+				font-size: 20px;
+				color: white;
+				padding-block: 5px;
+			}
 		</style>
 	}
 }
@@ -159,9 +165,7 @@ else
 		userdata = await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false);
 		if (!string.IsNullOrWhiteSpace(userdata))
 		{
-			var dataArray = userdata.Split(';', 2);
-			if (dataArray.Length == 2)
-				return dataArray[1];
+			return userdata;
 		}
 		return null;
 	}
@@ -278,7 +282,7 @@ else
 		//perhaps block button if already in watch list
 		try
 		{
-			var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/ticketer/watchlist/" + (await js.InvokeAsync<string>("localStorage.getItem", "user").ConfigureAwait(false)).Split(";", 2)[0] + "/" + Code);
+			var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/ticketer/watchlist/" + Code);
 			requestMsg.Headers.Add("Authorization", "Bearer " + await GetJWT());
 			var response = await Http.SendAsync(requestMsg);
 			if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)

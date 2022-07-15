@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace FinanceApp.Server.Controllers
 {
@@ -81,10 +82,13 @@ namespace FinanceApp.Server.Controllers
                 }).ToListAsync()
             );
         }
-        [HttpGet("watchlist/{user}")]
+        [HttpGet("watchlist")]
         [Authorize]
-        public async Task<IActionResult> getWatchlistForUser(string user)
+        public async Task<IActionResult> getWatchlistForUser()
         {
+            string user = GetEmailFromToken(HttpContext.User.Identity as ClaimsIdentity);
+            if (string.IsNullOrEmpty(user))
+                return BadRequest("No such user");
             return Ok(
                 await _service.GetWatchList_Ticketers(user).Select(e => e.Ticketer)
                 .Select(e => new Ticketer
@@ -99,10 +103,14 @@ namespace FinanceApp.Server.Controllers
             );
         }
 
-        [HttpPost("watchlist/{user}/{TicketerId}")]
+        [HttpPost("watchlist/{TicketerId}")]
         [Authorize]
-        public async Task<IActionResult> AddToWatchList(string user, int TicketerId)
+        public async Task<IActionResult> AddToWatchList(int TicketerId)
         {
+            string user = GetEmailFromToken(HttpContext.User.Identity as ClaimsIdentity);
+            if (string.IsNullOrEmpty(user))
+                return BadRequest("No such user");
+
             if ((await _service.GetWatchList_Ticketers(user).FirstOrDefaultAsync()) == null) {
                 await _service.CreateWatchList(user);
                 await _service.SavaChangesToDb();
@@ -115,10 +123,14 @@ namespace FinanceApp.Server.Controllers
             await _service.SavaChangesToDb();
             return Ok();
         }
-        [HttpDelete("watchlist/{user}/{TicketerId}")]
+        [HttpDelete("watchlist/{TicketerId}")]
         [Authorize]
-        public async Task<IActionResult> RemoveFromWatchList(string user, int TicketerId)
+        public async Task<IActionResult> RemoveFromWatchList(int TicketerId)
         {
+            string user = GetEmailFromToken(HttpContext.User.Identity as ClaimsIdentity);
+            if (string.IsNullOrEmpty(user))
+                return BadRequest("No such user");
+
             if ((await _service.GetWatchList_Ticketers(user).FirstOrDefaultAsync()) == null) 
                 BadRequest();
             if ((await _service.GetTicketer(TicketerId)) == null)
@@ -171,6 +183,13 @@ namespace FinanceApp.Server.Controllers
                 else
                     await _service.SaveTicketerDataToDb(result.ticker, toAdd.Where(e => e.Date > inDb.Max(e => e.Date)).ToList());
             }
+        }
+
+        private string GetEmailFromToken(ClaimsIdentity identity)
+        {
+            if (!string.IsNullOrEmpty(identity.Name))
+                return identity.Name;
+            return string.Empty;
         }
     }
 }
