@@ -1,5 +1,7 @@
 # APBD-FinanceApp
+Final project 4th semester
 
-Preferowany termin: środa - I tura: 13.00 - 16.00  <br />
-Opcjonalny termin: środa - II tura: 18.00 - 20.00  <br />
-We wtorek (plan piątkowy) jestem na uczelni 14.00 - 19.00 więc miałbym problem ze zdąrzeniem
+Backend: dotnet <br>
+Frontend: blazor <br>
+Database: Ms sql <br>
+Data source: https://polygon.io/
